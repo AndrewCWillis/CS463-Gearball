@@ -8,48 +8,7 @@ Class: CS 463G, Assignment 1
 import numpy as np
 import pandas as pd
 
-class special_gears:
-    def __init__(self):
-        #should have attribute for:
-        #ID: unique 
-        #Colors: 2 colors
-        #Location: 2 sides 
-        #Angle: starts at zero, perpindicular movements will increment or decrement by 60 degrees
-        '''
-        
-        two cases:
-            - when it rotation is parrelel to its current position, one neighbor changes and the other stays fixed
-            - when it rotattion is perpindicular to its current position, neigbhors do not change and gear rotates +/- 120
-        
-        thus with command of ('side', cw/ccw), all gears pointed to by that side should shuffle neigbhor one in cw or ccw direction
-        
-            
-        special_gears =  
-        
-				['_' 'RG' '_']
-				['RY' 'R*' 'RO']
-				['_' 'RB' '_']
 
-
-['_' 'RY' '_']     ['_' 'RB' '_']	['_' 'RO' '_']	     ['_' 'RG' '_']
-['GY' 'Y*' 'YB']   ['YB' 'B*' 'BO']	['BO' 'O*' 'OG']	['OG' 'G*' 'GY']
-['_' 'YV' '_']	   ['_' 'BV' '_']	['_' 'OV' '_']	    ['_' 'GV' '_']
-
-
-				['_' 'BV' '_']
-				['YV' 'V*' 'OV']
-				['_' 'GV' '_']
-                
-        I observed that the special gear pieces move always with the peices directly up or down from them. THus they are 
-        represented in the same string in the same np.array cell
-        
-        
-        '''
-        #There are 12 of these gears in total
-        #One perpendicular rotation should move 4 of these gears, +/- 120? degrees (depending on up or down rotation)
-        #In such a rotation the other 4 are idle
-        #
-        pass
 class side: 
     def __init__(self, color, start_state): 
         self.color = color
@@ -142,6 +101,17 @@ class gearball:
         
         '''
         self.solved = True
+        self.special_gear = [0,0,0,0,0,0,0,0,0,0] #log the angle they are at. after certian side moves, 
+        #4 gears will increment or decrement angle by 120 degrees
+        
+        '''
+        [B_R, B_O, B_V, B_Y, R_G, R_O, R_Y, G_Y, Y_V, O_G, O_V, G_V] are the gears
+        HAVE NOT FINISHED THE GEARS YET! There postion is fixed to the piece beside and below them, and that is how
+        they are displayed textually. The last step is to track their angle.
+        
+        They will increment or decrement by 120 degrees. There are 4 gears on each hemisphere of the cube, if you slice 
+        into thirds.
+        '''
         self.G_side = side('Green', 
         np.array([['G','G+(R_G)','G'],
          ['G+(O_G)','G*','G+(G_Y)'],
@@ -167,7 +137,8 @@ class gearball:
                    ['V+(Y_V)','V*','V+(O_V)'],
                    ['V','V+(G_V)','V']]))
         self.all_sides = np.array([self.G_side,self.R_side,self.B_side,self.O_side,self.Y_side,self.V_side])
-        #Next, store pointers to these sides to define adjacency mapping to touching rows, or columns
+        
+        #Next, store pointers to these sides to define adjacency mapping to touching rows, or columns of the np.arrays
         #Blue:
         self.B_side.North_Neighbor = self.R_side.gear_colors[2]
         self.B_side.South_Neighbor = self.V_side.gear_colors[0]
@@ -213,7 +184,14 @@ class gearball:
            
     def ccw(self, side):
        #make this just call clock wise 3 times
-       pass
+       self.cw(side)
+       self.cw(side.Opp_Side)
+                
+       self.cw(side)
+       self.cw(side.Opp_Side)
+       
+       self.cw(side)
+       self.cw(side.Opp_Side)
 
     
     def cw(self, side):
@@ -314,26 +292,32 @@ class gearball:
         for i in range(0, number_moves):
             which_side = np.random.randint(6)#pick a random side to rotate wrt
             which_dir = np.random.randint(2)#pick random direction (2 choices: cw, or ccw)
-            if which_dir == 0: #same as 3 clockwise rotations
-                '''
-                    change to make it call ccw function, and it will just call cw 3 times, this is ugly
-                '''
-                self.cw(self.all_sides[which_side])
-                self.cw(self.all_sides[which_side].Opp_Side)
+            last_side = -1
+            last_dir = -1
+            
+            if ((which_side == last_side) and (which_dir == last_dir)) or (which_side != last_side):#dissallows moves that undoes that previous one
+                #doesnt work all the way yet, needs to block moves in opposite direction of the same side or its opposite side
+                # for instance, Green CCW follow by Blue CW is allowed but shouldnt be
+                # because the gears enforce that when Blue moves, Green moves the same direction, vice versa
                 
-                self.cw(self.all_sides[which_side])
-                self.cw(self.all_sides[which_side].Opp_Side)
+                if which_dir == 0: #same as 3 clockwise rotations
                 
-                self.cw(self.all_sides[which_side])
-                self.cw(self.all_sides[which_side].Opp_Side)
-                
-                print('AFTER, ' + self.all_sides[which_side].color +', ' +self.all_sides[which_side].Opp_Side.color+ ', CCW :')
-                self.print_Puzzle_State()
+                    self.ccw(self.all_sides[which_side])
+                    
+                    
+                    print(str(i)+' AFTER, ' + self.all_sides[which_side].color +', ' +self.all_sides[which_side].Opp_Side.color+ ', CCW :')
+                    self.print_Puzzle_State()
+                else:
+                    self.cw(self.all_sides[which_side])
+                    self.cw(self.all_sides[which_side].Opp_Side)
+                    print(str(i)+' AFTER, ' + self.all_sides[which_side].color +', ' +self.all_sides[which_side].Opp_Side.color+ ', CW :')
+                    self.print_Puzzle_State()
             else:
-                self.cw(self.all_sides[which_side])
-                self.cw(self.all_sides[which_side].Opp_Side)
-                print('AFTER, ' + self.all_sides[which_side].color +', ' +self.all_sides[which_side].Opp_Side.color+ ', CW :')
-                self.print_Puzzle_State()
+                i = i - 1 #retry for a new roll
+                
+            last_side = which_side
+            last_dir = which_dir
+            
 
 def main():# I think she wants this to be its own script
     #initialize the gear ball
