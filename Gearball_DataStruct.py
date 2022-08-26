@@ -176,6 +176,33 @@ class gearball:
         self.V_side.West_Neighbor = self.Y_side.gear_colors[2]
         self.V_side.Opp_Side = self.R_side
         
+        #Might have to give similar pointers to the cell which contains the 4 gears that need to update for each side
+        #will be less verbose because (Green, Blue), (Red, Violet), (Yellow, Orange) will point to the same ones
+        '''
+        Maybe like this? But give it to the Side Class (Not GearBall Class)?
+        
+        Blue:
+           self.GearUpdate1 =  self.R_side.gear_colors[1][1]
+           self.GearUpdate2 =  self.R_side.gear_colors[1][2]
+           self.GearUpdate3 =  self.V_side.gear_colors[1][1]
+           self.GearUpdate4 =  self.V_side.gear_colors[1][2]
+            
+        Red:
+            self.GearUpdate1 = 
+            self.GearUpdate2 = 
+            self.GearUpdate3 = 
+            self.GearUpdate4 = 
+            
+        Yellow:
+            self.GearUpdate1 = 
+            self.GearUpdate2 = 
+            self.GearUpdate3 = 
+            self.GearUpdate4 = 
+        
+        (Can ignore Green, Violet, and Orange because the gears will already be updated by their opposites)
+        We Would have to read the text in that cell and update the same cell in the self.special_gear = [0,0,0,0,0,0,0,0,0,0]
+        array if we did that.
+        '''
 
         
     def copy(self, to, fro):
@@ -307,6 +334,7 @@ class gearball:
                     
                     print(str(i)+' AFTER, ' + self.all_sides[which_side].color +', ' +self.all_sides[which_side].Opp_Side.color+ ', CCW :')
                     self.print_Puzzle_State()
+                    
                 else:
                     self.cw(self.all_sides[which_side])
                     self.cw(self.all_sides[which_side].Opp_Side)
